@@ -1,0 +1,23 @@
+{
+  "name": "sb-utilities",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/richardpark-msft/sb-utilities.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/richardpark-msft/sb-utilities/issues"
+  },
+  "homepage": "https://github.com/richardpark-msft/sb-utilities#readme",
+  "dependencies": {
+    "@azure/service-bus": "^7.0.3"
+  }
+}
