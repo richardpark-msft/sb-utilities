@@ -3,7 +3,7 @@ const { createInterface } = require("readline");
 
 const sender = createSenderFromFirstArg("send");
 
-const something = createInterface({
+const readlineInterface = createInterface({
     terminal: false,
     input: process.stdin,
     output: process.stdout
@@ -12,11 +12,11 @@ const something = createInterface({
 /** @type {Promise<any>[]} */
 const sendPromises = [];
 
-something.on('line', (line) => {
+readlineInterface.on('line', (line) => {
     sendPromises.push(sender.sendMessages(loadArgFromFileOrText(line)));
 });
 
-something.on('close', () => {
+readlineInterface.on('close', () => {
     Promise.all(sendPromises)
         .catch((err) => {
             console.error(err);
