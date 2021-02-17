@@ -4,20 +4,21 @@
 import { AbortSignalLike } from "@azure/abort-controller";
 import * as yargs from "yargs";
 
-import { AuthCommandArgs, authenticationBuilder, createServiceBusClient } from "../shared/auth";
-import { createPrintMessageFn } from "../shared/cli";
+import { AuthenticationArgs, authenticationBuilder, createServiceBusClient } from "../shared/auth";
+import { addTimeoutToAbortSignal, createPrintMessageFn } from "../shared/cli";
 
-export interface PeekCommandArgs extends AuthCommandArgs {
-  properties: string[];
-  linenumber: boolean;
+interface PeekCommandArgs extends AuthenticationArgs {
   entity: string;
-  count?: number;
+
+  count?: string;
   timeout?: string;
+
+  linenumber: boolean;
+  property: string[];
 }
 
 export class PeekCommand implements yargs.CommandModule<{}, PeekCommandArgs> {
-  constructor(private _abortSignal: AbortSignalLike) {
-  }
+  constructor(private _abortSignal: AbortSignalLike) { }
 
   command = "peek <entity>";
   description = "Peek messages from a queue or subscription";
@@ -34,22 +35,23 @@ export class PeekCommand implements yargs.CommandModule<{}, PeekCommandArgs> {
       },
       "count": {
         group: "Arguments",
-        description:
-          "The maximum number of messages to receive. Can be superceded by timeout. Defaults to -1 (infinite).",
-        number: true,
-        default: -1
+        alias: ["c"],
+        description: "The maximum number of messages to receive",
+        string: true,
+        default: "infinite"
       },
       "timeout": {
         group: "Arguments",
+        alias: ["t"],
         description:
           "Amount of time to wait for messages before exiting. Takes precedence over 'count'.",
         string: true,
         default: "infinite",
       },
-      "properties": {
+      "property": {
         group: "Arguments",
         alias: ["p"],
-        description: "Properties to extract from the message.These can be any field in the type ServiceBusReceivedMessage",
+        description: "Property to extract from the message. These can be any field in the type ServiceBusReceivedMessage and can be specified multiple times.",
         array: true,
         default: ["body", "messageId"]
       },
@@ -65,18 +67,38 @@ export class PeekCommand implements yargs.CommandModule<{}, PeekCommandArgs> {
 
   async handler(args: PeekCommandArgs): Promise<void> {
     const serviceBusClient = createServiceBusClient(args);
+    const abortSignal = addTimeoutToAbortSignal(args.timeout, this._abortSignal);
+
+    let limit: number | undefined;
+
+    if (args.count == null || args.count === "infinite") {
+      limit = undefined;
+    } else {
+      limit = parseInt(args.count, 10);
+
+      if (isNaN(limit)) {
+        throw new Error(`Non-numeric count '${args.count}' is not allowed`);
+      }
+    }
 
     try {
       const receiver = serviceBusClient.createReceiver(args.entity);
-      const printMessage = createPrintMessageFn(args.properties, args.linenumber);
+      const printMessage = createPrintMessageFn(args.property, args.linenumber);
+      let count = 0;
 
       while (true) {
         let messages = await receiver.peekMessages(1, {
-          abortSignal: this._abortSignal
+          abortSignal
         });
 
         for (const message of messages) {
           printMessage(message);
+        }
+
+        count += messages.length;
+
+        if (limit != null && count >= limit) {
+          break;
         }
       }
     } catch (err) {

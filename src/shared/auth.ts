@@ -10,7 +10,7 @@ import yargs from "yargs";
 /**
  * @internal
  */
-export interface AuthCommandArgs {
+export interface AuthenticationArgs {
   connectionstring: string | undefined;
   env: boolean | undefined;
   namespace: string | undefined;
@@ -19,7 +19,7 @@ export interface AuthCommandArgs {
 /**
  * @internal
  */
-export function authenticationBuilder(yargs: yargs.Argv<{}>): yargs.Argv<AuthCommandArgs> {
+export function authenticationBuilder(yargs: yargs.Argv<{}>): yargs.Argv<AuthenticationArgs> {
   return yargs.options({
     "connectionstring": {
       group: "Authentication:",
@@ -49,7 +49,7 @@ export function authenticationBuilder(yargs: yargs.Argv<{}>): yargs.Argv<AuthCom
 /**
  * @internal
  */
-export function createServiceBusClient(parsedArgs: AuthCommandArgs) {
+export function createServiceBusClient(parsedArgs: AuthenticationArgs) {
   if (parsedArgs.connectionstring) {
     return new ServiceBusClient(parsedArgs.connectionstring);
   } else if (parsedArgs.env) {

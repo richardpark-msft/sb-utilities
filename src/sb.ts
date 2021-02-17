@@ -7,12 +7,14 @@ import { AbortController } from "@azure/abort-controller";
 import yargs from "yargs";
 
 import * as peek from "./commands/peek";
+import * as send from "./commands/send";
 
 async function main() {
   const ac = new AbortController();
 
   yargs(process.argv.slice(2))
     .command(new peek.PeekCommand(ac.signal))
+    .command(new send.SendCommand(ac.signal))
     .demandCommand()
     .strictCommands()
     .help()
