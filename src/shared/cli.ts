@@ -1,7 +1,6 @@
 // Copyright (c) Microsoft Corporation.
 // Licensed under the MIT license.
 
-import { AbortSignalLike, AbortController } from "@azure/abort-controller";
 import { readFileSync } from "fs";
 
 /**
@@ -64,7 +63,7 @@ const timeMultipliers: Record<string, number> = {
   "h": 60 * 60 * 1000
 };
 
-function convertTimeoutToTicks(timeout: string | "infinite" | undefined): (number | undefined) {
+export function convertTimeoutToTicks(timeout: string | "infinite" | undefined): (number | undefined) {
   if (timeout == null || timeout.length === 0) {
     throw new Error("Invalid or empty timeout value");
   }
@@ -91,14 +90,17 @@ function convertTimeoutToTicks(timeout: string | "infinite" | undefined): (numbe
   return amount * unit;
 }
 
-export function addTimeoutToAbortSignal(timeout: string | "infinite" | undefined, origAbortSignal: AbortSignalLike): AbortSignalLike {
-  const timeoutInTicks = convertTimeoutToTicks(timeout);
+export function parseNumberThatMightBeInfinite(numberOrInfinite: string | undefined | "infinite") {
+  let limit: number | undefined;
 
-  if (timeoutInTicks == null) {
-    return origAbortSignal;
+  if (numberOrInfinite == null || numberOrInfinite === "infinite") {
+    limit = undefined;
   } else {
-    const ac = new AbortController(origAbortSignal);
-    setTimeout(() => ac.abort(), timeoutInTicks);
-    return ac.signal;
+    limit = parseInt(numberOrInfinite, 10);
+
+    if (isNaN(limit)) {
+      throw new Error(`Non-numeric count '${numberOrInfinite}' is not allowed`);
+    }
   }
+  return limit;
 }

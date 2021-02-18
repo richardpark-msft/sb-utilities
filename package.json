@@ -1,14 +1,16 @@
 {
-  "name": "sbclisample",
+  "name": "@azure/service-bus-cli",
   "version": "1.0.0",
   "description": "",
   "main": "dist/sb.js",
   "scripts": {
-    "build": "tsc -p .",
+    "build": "tsc -p . && go build -o bin/chatty.exe go/chatty.go",
+    "pack": "npm run build && npm pack",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
-    "sb": "dist/sb.js"
+    "sb": "dist/sb.js",
+    "chatty": "bin/chatty.exe"
   },
   "keywords": [],
   "author": "",

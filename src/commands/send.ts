@@ -1,15 +1,15 @@
 import { AbortSignalLike } from "@azure/abort-controller";
-import { readFileSync } from "fs";
-//import { readFileSync } from "fs";
-import yargs from "yargs";
-import { AuthenticationArgs, authenticationBuilder, createServiceBusClient } from "../shared/auth";
+import { ServiceBusMessage, ServiceBusSender } from "@azure/service-bus";
+
 import { EOL } from "os";
+import yargs from "yargs";
 import { createInterface } from "readline";
+
+import { AuthenticationArgs, authenticationBuilder, createServiceBusClient } from "../shared/auth";
 
 interface SendCommandArgs extends AuthenticationArgs {
   entity: string;
-  full: boolean;
-  file: string[];
+  multiple: boolean;
 }
 
 export class SendCommand implements yargs.CommandModule<{}, SendCommandArgs> {
@@ -28,22 +28,14 @@ export class SendCommand implements yargs.CommandModule<{}, SendCommandArgs> {
         string: true,
         nargs: 1,
         demandOption: true
-      },
-      "file": {
+      }, "multiple": {
         group: "Arguments",
-        description:
-          "A file to send. If not specified contents are assumed to come from stdin. This option can be specified multiple times.",
-        array: true,
-        string: true,
-        default: []
-      },
-      "full": {
-        group: "Arguments",
-        description:
-          "Whether the file contents (or stdin) represent just a body or a full ServiceBusMessage object (including properties, etc..)",
-        boolean: false,
+        alias: ["m"],
+        description: "Whether the content to send is multiple messages (one per line) or a single message",
+        boolean: true,
         default: false
       }
+      // TODO: let user control the body type detection.
     });
   }
 
@@ -52,53 +44,7 @@ export class SendCommand implements yargs.CommandModule<{}, SendCommandArgs> {
 
     try {
       const sender = serviceBusClient.createSender(args.entity);
-
-      if (args.file == null || args.file.length === 0) {
-        const text = await new Promise<string>((resolve) => {
-          const readlineInterface = createInterface({
-            input: process.stdin,
-            output: process.stdout
-          });
-
-          const lines: string[] = [];
-
-          readlineInterface.on('line', (line) => {
-            lines.push(line);
-          });
-
-          readlineInterface.on('close', () => {
-            resolve(lines.join(EOL));
-          });
-        });
-
-        if (args.full) {
-          await sender.sendMessages(JSON.parse(text), {
-            abortSignal: this._abortSignal
-          });
-        } else {
-          await sender.sendMessages({
-            body: text
-          }, {
-            abortSignal: this._abortSignal
-          });
-        }
-      } else {
-        for (const filePath of args.file) {
-          const contents = readFileSync(filePath, "binary");
-
-          if (args.full) {
-            await sender.sendMessages(JSON.parse(contents), {
-              abortSignal: this._abortSignal
-            });
-          } else {
-            await sender.sendMessages({
-              body: contents
-            }, {
-              abortSignal: this._abortSignal
-            });
-          }
-        }
-      }
+      await sendMessagesFromStdin(this._abortSignal, sender, args.multiple);
     } catch (err) {
       if (err.name === "AbortError") {
         // user is just trying to stop command, non-fatal.
@@ -109,5 +55,57 @@ export class SendCommand implements yargs.CommandModule<{}, SendCommandArgs> {
     } finally {
       await serviceBusClient.close();
     }
+  }
+}
+
+async function sendMessagesFromStdin(abortSignal: AbortSignalLike, sender: ServiceBusSender, multiple: boolean): Promise<void> {
+  return await new Promise<void>((resolve, reject) => {
+    const readlineInterface = createInterface({
+      input: process.stdin,
+      output: process.stdin.isTTY ? process.stdout : undefined,
+      terminal: process.stdin.isTTY,
+    });
+
+    const lines: string[] = [];
+    // TODO: trim this as we go.
+    const remainingMessages: Promise<void>[] = [];
+
+    readlineInterface.on('line', (line) => {
+      if (multiple) {
+        const message = formatServiceBusReceivedMessage(line);
+        remainingMessages.push(sender.sendMessages(message, { abortSignal }));
+      } else {
+        lines.push(line);
+      }
+    });
+
+    readlineInterface.on('close', () => {
+      let pendingMessagesPromise: Promise<void | void[]>;
+
+      if (lines.length === 0) {
+        pendingMessagesPromise = Promise.all(remainingMessages);
+      } else {
+        const message = formatServiceBusReceivedMessage(lines.join(EOL));
+        pendingMessagesPromise = sender.sendMessages(message, { abortSignal });
+      }
+
+      pendingMessagesPromise
+        .then(() => resolve())
+        .catch((err) => reject(err));
+    });
+  });
+}
+
+function formatServiceBusReceivedMessage(text: string): ServiceBusMessage {
+  try {
+    const potentialMessage = JSON.parse(text);
+
+    if (potentialMessage.body != null) {
+      return potentialMessage;
+    }
+  } catch (_err) { }
+
+  return {
+    body: text
   }
 }

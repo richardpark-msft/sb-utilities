@@ -102,3 +102,10 @@ dist
 
 # TernJS port file
 .tern-port
+
+# random stuff.
+.vscode
+tmp
+temp
+*.tgz
+bin
