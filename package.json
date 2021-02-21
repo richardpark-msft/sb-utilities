@@ -1,5 +1,5 @@
 {
-  "name": "@azure/service-bus-cli",
+  "name": "@azure/service-bus-tools",
   "version": "1.0.0",
   "description": "",
   "main": "dist/sb.js",

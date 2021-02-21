@@ -63,7 +63,7 @@ export class ListenCommand implements yargs.CommandModule<{}, ListenCommandArgs>
         alias: ["p"],
         description: "Property to extract from the message. These can be any field in the type ServiceBusReceivedMessage and can be specified multiple times.",
         array: true,
-        default: ["body", "messageId"]
+        default: ["body", "messageId", "applicationProperties"]
       },
       "linenumber": {
         group: "Arguments",

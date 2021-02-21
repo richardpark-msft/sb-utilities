@@ -13,6 +13,7 @@ async function main() {
   const ac = new AbortController();
 
   yargs(process.argv.slice(2))
+    .scriptName("sb")
     .command(new listen.ListenCommand(ac.signal))
     .command(new send.SendCommand(ac.signal))
     .demandCommand()
@@ -26,16 +27,5 @@ main().catch((err) => {
   process.exit(1);
 });
 
-// listen
-// dump
-
-// listen --mode=peek --follow
-// listen --mode=receiveAndDelete --follow
-// listen --mode=peek --count=5
-// listen --mode=peek --timeout=5
-
 // stats
-
 // dead letter queue mgmt
-
-
