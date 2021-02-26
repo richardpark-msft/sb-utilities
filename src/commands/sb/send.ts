@@ -5,7 +5,7 @@ import { EOL } from "os";
 import yargs from "yargs";
 import { createInterface } from "readline";
 
-import { AuthenticationArgs, authenticationBuilder, createServiceBusClient } from "../shared/auth";
+import { AuthenticationArgs, authenticationBuilder, createServiceBusClient } from "./shared/auth";
 
 interface SendCommandArgs extends AuthenticationArgs {
   entity: string;

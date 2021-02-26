@@ -6,8 +6,8 @@
 import { AbortController } from "@azure/abort-controller";
 import yargs from "yargs";
 
-import * as listen from "./commands/listen";
-import * as send from "./commands/send";
+import * as listen from "./commands/sb/listen";
+import * as send from "./commands/sb/send";
 
 async function main() {
   const ac = new AbortController();

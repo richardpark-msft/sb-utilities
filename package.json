@@ -6,10 +6,12 @@
   "scripts": {
     "build": "tsc -p . && go build -o bin/chatty.exe go/chatty.go",
     "pack": "npm run build && npm pack",
+    "installcli": "npm run pack && npm uninstall -g @azure/service-bus-tools && npm install -g azure-service-bus-tools-1.0.0.tgz",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {
     "sb": "dist/sb.js",
+    "ac": "dist/ac.js",
     "chatty": "bin/chatty.exe"
   },
   "keywords": [],
@@ -17,6 +19,7 @@
   "license": "ISC",
   "dependencies": {
     "@azure/abort-controller": "^1.0.2",
+    "@azure/app-configuration": "^1.1.0",
     "@azure/identity": "^1.2.2",
     "@azure/service-bus": "^7.0.3",
     "dotenv": "^8.2.0",

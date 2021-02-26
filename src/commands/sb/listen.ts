@@ -4,9 +4,9 @@
 import { AbortSignalLike, AbortController } from "@azure/abort-controller";
 import * as yargs from "yargs";
 
-import { AuthenticationArgs, authenticationBuilder, createServiceBusClient } from "../shared/auth";
-import { createPrintMessageFn, parseNumberThatMightBeInfinite } from "../shared/cli";
-import { addTimeouts, TimeoutOptions } from "../shared/abortControllerHelpers";
+import { AuthenticationArgs, authenticationBuilder, createServiceBusClient } from "./shared/auth";
+import { createPrintMessageFn, parseNumberThatMightBeInfinite } from "../../shared/cli";
+import { addTimeouts, TimeoutOptions } from "../../shared/abortControllerHelpers";
 import { ServiceBusReceivedMessage } from "@azure/service-bus";
 
 interface ListenCommandArgs extends AuthenticationArgs, TimeoutOptions {

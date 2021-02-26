@@ -16,9 +16,6 @@ export interface AuthenticationArgs {
   namespace: string | undefined;
 }
 
-/**
- * @internal
- */
 export function authenticationBuilder(yargs: yargs.Argv<{}>): yargs.Argv<AuthenticationArgs> {
   return yargs.options({
     "connectionstring": {
