@@ -5,21 +5,22 @@ import * as yargs from "yargs";
 import * as dotenv from "dotenv";
 import { AppConfigurationClient, SetConfigurationSettingResponse } from "@azure/app-configuration";
 import { readFromStdinAndExecute } from "../../shared/stdinHelpers";
+import { authenticationBuilder } from "./shared/auth";
 
-interface PutCommandArgs {
+interface SetCommandArgs {
 }
 
-export class PutCommand implements yargs.CommandModule<{}, PutCommandArgs> {
+export class SetCommand implements yargs.CommandModule<{}, SetCommandArgs> {
   constructor() { }
 
-  command = "purge";
-  description = "Purges all settings from an AppConfig instance";
+  command = "set";
+  description = "Set a value to the AppConfig server";
 
   builder(yargs: yargs.Argv<{}>) {
-    return yargs;
+    return authenticationBuilder(yargs);
   }
 
-  async handler(_args: PutCommandArgs): Promise<void> {
+  async handler(_args: SetCommandArgs): Promise<void> {
     dotenv.config();
 
     const client = new AppConfigurationClient(process.env.APPCONFIG_CONNECTION_STRING!);

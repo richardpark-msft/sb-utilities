@@ -6,10 +6,8 @@ import { ServiceBusClient } from "@azure/service-bus";
 
 import * as dotenv from "dotenv";
 import yargs from "yargs";
+import { getConnectionStringFromEnvironment } from "../../../shared/sharedAuth";
 
-/**
- * @internal
- */
 export interface AuthenticationArgs {
   connectionstring: string | undefined;
   env: boolean | undefined;
@@ -51,18 +49,10 @@ export function createServiceBusClient(parsedArgs: AuthenticationArgs) {
     return new ServiceBusClient(parsedArgs.connectionstring);
   } else if (parsedArgs.env) {
     dotenv.config();
-    return new ServiceBusClient(getConnectionStringFromEnvironment());
+    return new ServiceBusClient(getConnectionStringFromEnvironment("SERVICEBUS_CONNECTION_STRING"));
   } else if (parsedArgs.namespace) {
     return new ServiceBusClient(parsedArgs.namespace, new DefaultAzureCredential());
   } else {
     throw new Error("No authentication method specified");
   }
-}
-
-function getConnectionStringFromEnvironment(): string {
-  if (!process.env.SERVICEBUS_CONNECTION_STRING) {
-    throw new Error("SERVICEBUS_CONNECTION_STRING was not defined in the environment");
-  }
-
-  return process.env.SERVICEBUS_CONNECTION_STRING;
 }

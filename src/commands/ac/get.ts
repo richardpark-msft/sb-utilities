@@ -4,6 +4,7 @@
 import * as yargs from "yargs";
 import * as dotenv from "dotenv";
 import { AppConfigurationClient } from "@azure/app-configuration";
+import { authenticationBuilder } from "./shared/auth";
 
 interface GetCommandArgs {
   key: string;
@@ -17,7 +18,7 @@ export class GetCommand implements yargs.CommandModule<{}, GetCommandArgs> {
   description = "Get a single setting from an AppConfig instance";
 
   builder(yargs: yargs.Argv<{}>) {
-    return yargs.options({
+    return authenticationBuilder(yargs).options({
       "key": {
         group: "Arguments",
         description:

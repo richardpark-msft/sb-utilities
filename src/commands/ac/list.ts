@@ -4,6 +4,7 @@
 import * as yargs from "yargs";
 import * as dotenv from "dotenv";
 import { AppConfigurationClient } from "@azure/app-configuration";
+import { authenticationBuilder } from "./shared/auth";
 
 interface ListCommandArgs {
   keyFilter?: string;
@@ -17,7 +18,7 @@ export class ListCommand implements yargs.CommandModule<{}, ListCommandArgs> {
   description = "List configuration settings using key and label filters";
 
   builder(yargs: yargs.Argv<{}>) {
-    return yargs.options({
+    return authenticationBuilder(yargs).options({
       "keyFilter": {
         group: "Arguments",
         description:

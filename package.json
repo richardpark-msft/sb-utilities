@@ -1,12 +1,12 @@
 {
-  "name": "@azure/service-bus-tools",
+  "name": "@azure/sdk-tools",
   "version": "1.0.0",
   "description": "",
   "main": "dist/sb.js",
   "scripts": {
     "build": "tsc -p . && go build -o bin/chatty.exe go/chatty.go",
     "pack": "npm run build && npm pack",
-    "installcli": "npm run pack && npm uninstall -g @azure/service-bus-tools && npm install -g azure-service-bus-tools-1.0.0.tgz",
+    "installcli": "npm run pack && npm uninstall -g @azure/service-bus-tools && npm install -g azure-sdk-tools-1.0.0.tgz",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "bin": {

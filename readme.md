@@ -1,32 +1,78 @@
 ## Installation
 
-npm install azure-0service=
+`npm install @azure/azure-tools`
 
-## Authentication
+## Authentication methods (--authentication-method)
 
-`sb` can authenticate using Service Bus connection strings or Azure Identity using DefaultAzureCredential.
+Commands generally support multiple methods for authentication.
 
-When using DefaultAzureCredential `sb` will be able to share authentication with the `az` CLI, as well as authentication configured within Visual Studio Code.
+- [DefaultAzureCredential](#defaultazurecredential-authentication)
+- [Environment variables](#environment-variable-authentication)
+- [Command line](#command-line-authentication)
 
-All commands accept one of these options for authentication:
+### DefaultAzureCredential authentication
+
+`DefaultAzureCredential` makes it so the CLI can authenticate from several implicit authentication sources on your machine.
+
+Here are some sources that will be used, if available: 
+* Credentials from `az login`
+* Visual Studio Code, if you've authenticated to Azure
+* (Windows only) Visual Studio, if you've authenticated to Azure
+* The standard environment variables for specifying a Managed Identity
+* The token endpoint provided as part of environments like Azure App Services and Azure Functions.
+
+And of course this also works if you're writing code as well. See more about DefaultAzureCredential here:
+- [JS](https://github.com/Azure/azure-sdk-for-js/blob/master/sdk/identity/identity/README.md)
+(...others)
+
+The credential will look like this:
+
+```bash
+# for the sb cli (service bus)
+sb [command] --namespace=<service-bus-name.servicebus.windows.net>
+
+# for the ac cli (app configuration)
+ac [command] --server=<https://<appconfig instance name>.azconfig.io>
+```
+
+### Environment variable authentication
+
+Commands can source connection information from environment variables as well. To simplify the loading of environment variables (and to prevent possible leakage of credentials in the process command line) all commands will implicitly source a .env file, loading the 
+environment off disk.
+
+Note, the .env file is optional and is only loaded if present in the current folder.
+
+To use the environment:
 
 ```bash
 # sources a local .env file (if available) and looks for SERVICEBUS_CONNECTION_STRING in the environment
---env       
+sb [command] --env
 
-# uses the DefaultAzureCredential (authenticate via pre-configured credential in the Azure CLI, Visual Studio Code and more!)
---namespace=<service-bus-name.servicebus.windows.net> 
-
-# Use a connection string directly passed on the command line
---connectionstring=<service bus connection string>
+# sources a local .env file (if available) and looks for APPCONFIG_CONNECTION_STRING in the environment
+ac [command] --env
 ```
 
-Authentication will be abbreviated as `--authentication-method` in later examples.
+### Command line authentication
 
-# Commands
+Commands that use connection strings will generally take them on the command line.
 
-- [Sending](#send-messages-to-a-queue-or-topic)
-- [Receiving](#receive-messages-from-a-queue-or-subscription)
+> NOTE: specifying crednetials or other secret information in the command line for a program is generally not good practice as it exposes the secrets in a way that can be seen through tools like Task Manager or `ps`.
+
+Examples:
+
+```bash
+sb [command] --connectionstring=<service bus connection string>
+ac [command] --connectionstring=<appconfig connection string>
+```
+
+# `sb` Commands
+
+`sb` allows you to receive (peek or "receive and delete") and send streams of messages to Service Bus, to both queues, topics and subscriptions.
+
+Commands:
+
+- [Sending: `sb send`](#send-messages-to-a-queue-or-topic)
+- [Receiving: `sb receive`](#receive-messages-from-a-queue-or-subscription)
 
 ## Send messages to a queue or topic
 
@@ -98,3 +144,17 @@ sb receive 'queue or topic' --count 10 --authentication-method
 # delete messages after they are received (can be used with any of the variations above)
 sb receive 'queue or topic' --delete --authentication-method
 ```
+
+# `ac` Commands
+
+`ac` allows you to query/set keys in App Configuration. It also contains some convenience commands like `purge` or `search` for doing operations with larger sets of keys and values.
+
+### Getting keys/values
+
+### Saving keys/values
+
+### Searching keys/values
+
+### Purging
+
+
