@@ -1,7 +1,3 @@
-## Installation
-
-`npm install @azure/azure-tools`
-
 ## Authentication methods (--authentication-method)
 
 Commands generally support multiple methods for authentication.
