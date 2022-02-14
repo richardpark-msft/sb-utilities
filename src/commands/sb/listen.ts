@@ -122,7 +122,7 @@ export class ListenCommand implements yargs.CommandModule<{}, ListenCommandArgs>
         }
       }
     } catch (err) {
-      if (err.name === "AbortError") {
+      if (err instanceof Error && err.name === "AbortError") {
         // user is just trying to stop command, non-fatal.
         return;
       } else {

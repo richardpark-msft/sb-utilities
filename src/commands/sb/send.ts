@@ -46,7 +46,7 @@ export class SendCommand implements yargs.CommandModule<{}, SendCommandArgs> {
       const sender = serviceBusClient.createSender(args.entity);
       await sendMessagesFromStdin(this._abortSignal, sender, args.multiple);
     } catch (err) {
-      if (err.name === "AbortError") {
+      if (err instanceof Error && err.name === "AbortError") {
         // user is just trying to stop command, non-fatal.
         return;
       } else {
