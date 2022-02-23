@@ -1,6 +1,6 @@
 ## Installation
 
-1. Download the latest release package [sb-utilities/releases](https://github.com/richardpark-msft/sb-utilities/releases)
+1. Download the latest azure-sdk-tools*.tgz package [sb-utilities/releases](https://github.com/richardpark-msft/sb-utilities/releases)
 2. Open a command prompt/terminal
 3. `npm install -g --force <package release you downloaded>`
 
